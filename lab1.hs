@@ -1,6 +1,7 @@
 --Autor: Jaime Pastrana García
+--Versión 2
 
---1 Calcular años, días horas minutos y segundos
+--1 Calcular años, días, horas, minutos y segundos
 --1.a
 result :: (Int, Int, Int, Int, Int)
 result = let {total = 1000000; syear = (60*60*24*365); sdias = (60*60*24);
@@ -61,18 +62,21 @@ reduccion x
 disyuncion1 :: Bool -> Bool -> Bool
 disyuncion1 _ True = True --Consecuencia: estricto en el segundo argumento
 disyuncion1 True _ = True
-disyuncion1 False x = x
+disyuncion1 False x = x --El primero es estricto si el segundo es False (inevitable)
 
 disyuncion2 :: Bool -> Bool -> Bool
 disyuncion2 True _ = True --Consecuencia: estricto en el primer argumento
 disyuncion2 _ True = True
-disyuncion2 False x = x
+disyuncion2 False x = x --El segundo es estricto si el primero es False (inevitable)
 
 disyuncion3 :: Bool -> Bool -> Bool
-disyuncion3 False x = x  --Consecuencia: estricto en ambos argumentos (salvo que el primer argumento sea True)
+disyuncion3 False x = x  --Consecuencia: estricto en el primer argumento (Equivalente a disyuncion2)
 disyuncion3 True _ = True 
 --disyuncion3 _ True = True --Redundante
 
-
+disyuncion4 :: Bool -> Bool -> Bool
+disyuncion4 False x = x --Consecuencia: estricto en ambos argumentos (siempre)
+disyuncion4 x False = x
+disyuncion4 True _ = True
 
 
