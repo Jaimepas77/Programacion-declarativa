@@ -46,13 +46,13 @@ ex n m p = not$ null$ filter p [n..m]
 
 --3___________________
 --a
-filter2::Enum a => [a] -> (a->Bool) -> (a->Bool) -> ([a], [a])
+filter2::[a] -> (a->Bool) -> (a->Bool) -> ([a], [a])
 filter2 xs p q = (filter p xs, filter q xs)
 
 --b
---filters::Enum a => [a] -> [(a->Bool)] -> [[a]]
---filters xs ps = filter p xs
---(comentado para que compile)
+filters:: [a] -> [(a->Bool)] -> [[a]]
+filters xs ps = map (\p -> filter p xs) ps
 
 --c
-mapx x xs = map (\f -> f x) xs
+mapx::a->[a->b] -> [b]
+mapx x fs = map (\f -> f x) fs
