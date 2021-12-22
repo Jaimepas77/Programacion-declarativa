@@ -11,19 +11,16 @@ instance Show Hash where
     
 hashToStr::[[(String, String)]] -> Int -> String
 hashToStr [] _ = ""
-hashToStr (it:list) i = "|" ++ show i ++ "|-> " ++ listToStr it ++ "\n" ++ hashToStr list (i+1)
+hashToStr (it:list) i = "|" ++ show i ++ "|-> " ++ listToStr it ++ "\n" ++ hashToStr list (i+1) --Se recorren los índices recursivamente
 
 listToStr::[(String, String)] -> String
 listToStr [] = ""
-listToStr ((w1, w2):ws) = w1 ++ ": " ++ w2 ++ " | " ++ listToStr ws
+listToStr ((w1, w2):ws) = foldl (\ret (t1, t2) -> ret ++ " | " ++ pair t1 t2) (pair w1 w2) ws   --w1 ++ ": " ++ w2 ++ " | " ++ .. ++ " | " ++ w1 ++ ": " ++ w2
+                          where pair a b = a ++ ": " ++ b
 
 --3. Definir una función hash que devuelva el índice de la palabra en la tabla (0-9)
 hash::String -> Int
-hash word = (charPos (head word)) `mod` hashSize    --Posición del carácter respecto a 'A' módulo 10
-
-charPos::Char -> Int
-charPos 'A' = 0
-charPos c = charPos (pred c) + 1
+hash word = (fromEnum (head word)) `mod` hashSize    --Ascii del carácter módulo 10
 
 ------------------------------
 --FUNCIONALIDAD DE  TRADUCIR--
@@ -41,13 +38,9 @@ initDictionary::String -> Hash
 initDictionary txt = Hash $encode $parse (lines txt)    --Una vez se ha parseado y codificado según el esquema del hashmap, se retorna como un tipo Hash
 
 parse::[String] -> [(String, String)]   --Se parsean las traducciones como pares de palabras
-parse [] = []
-parse (l:ls) = ((original, traduction):(parse ls))
-                where original = head $words l
-                      traduction = head $tail $words l
+parse ls = [(original, traduccion) | [original, traduccion] <- map words ls]
 
 encode::[(String, String)] -> [[(String, String)]]  --Se asocia cada par a su hash correspondiente y se guarda en ese índice de la lista resultante
-encode [] = [[]]
 encode xs = [[(s1, s2) | (s1, s2) <- xs, hash s1 == n] | n <- [0..(hashSize-1)]]
 
 --5. Leer varias palabras para traducir (I/O)
@@ -67,11 +60,8 @@ search (Hash dic) w = [s2 | (s1, s2) <- hashLine, s1 == w]  --Si encuentra varia
 
 --8. Mostrar traducción encontrada (se retorna en un string)
 showResult::Hash -> [String] -> String
-showResult _ [] = ""
-showResult dic (w:ws) = "-" ++ w ++ ": " ++ (resultToStr (search dic w)) ++ "\n"    --De cada palabra se busca y muestra su traducción
-                        ++ showResult dic ws    --Recursividad
+showResult dic ws = concat ["-" ++ w ++ ": " ++ (resultToStr (search dic w)) ++ "\n" | w <- ws] --De cada palabra se busca y muestra su traducción
 
-resultToStr::[String] -> String
+resultToStr::[String] -> String --Implementación que acepta casos con varias acepciones para una misma palabra y que discierne el caso de que no está en el diccionario
 resultToStr [] = "palabra no encontrada"    --Si la lista de acepciones para esa palabra está vacía es porque no está en el diccionario
-resultToStr [x] = x
-resultToStr (x:xs) = x ++ ", " ++ resultToStr xs
+resultToStr (x:xs) = foldl (\ret w -> ret ++ ", " ++ w) x xs    --Juntar todas las acepciones encontradas en un string separadas por comas
